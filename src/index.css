@@ -128,22 +128,20 @@ body {
   background: linear-gradient(90deg, #232526, #414345);
   padding: 0.7rem 2rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  position: static;
+  position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 1000;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* .navbar,
 .secondary-navbar {
-  width: 100%;
-  left: 0;
-  right: 0;
   position: sticky;
-  margin: 0;
-  top: 0;
+  top: 70px; /* Adjust based on main navbar height */
+  z-index: 999;
+  width: 100%;
   box-sizing: border-box;
-  z-index: 10;
-} */
+}
 
 .navbar-brand {
   font-size: 1.9rem;
@@ -453,8 +451,4 @@ body {
 //       </footer>
 //     </div>
 //   );
-// } */
-
- {
-  /* <Footer /> */
-}
+*/
