@@ -1,0 +1,460 @@
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: linear-gradient(120deg, #232526, #414345);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+.app-header {
+  background: linear-gradient(90deg, #ff512f, #dd2476);
+  color: #fff;
+  padding: 2rem 0 1rem 0;
+  text-align: center;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.app-title {
+  font-size: 1.8rem;
+  margin: 0;
+  letter-spacing: 2px;
+}
+
+.app-subtitle {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.movies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.movie-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.movie-card:hover .movie-details {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.movie-poster {
+  width: 100%;
+  height: 350px;
+  object-fit: cover;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+}
+
+.no-image {
+  width: 100%;
+  height: 350px;
+  background: #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #bbb;
+  font-size: 2rem;
+}
+
+.movie-details {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(20, 20, 20, 0.85);
+  color: #fff;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.movie-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  color: #ff512f;
+}
+
+.movie-overview {
+  font-size: 0.95rem;
+  color: #eee;
+  margin-bottom: 0.5rem;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.movie-info {
+  display: flex;
+  align-items: center;
+  margin-top: auto;
+}
+
+.movie-rating {
+  background: #dd2476;
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.3rem 0.7rem;
+  font-weight: bold;
+  font-size: 0.95rem;
+  margin-right: 0.5rem;
+}
+
+.movie-date {
+  color: #bbb;
+  font-size: 0.9rem;
+}
+
+.loading {
+  text-align: center;
+  margin-top: 3rem;
+  font-size: 1.5rem;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(90deg, #232526, #414345);
+  padding: 0.7rem 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  position: static;
+  top: 0;
+  z-index: 10;
+}
+
+/* .navbar,
+.secondary-navbar {
+  width: 100%;
+  left: 0;
+  right: 0;
+  position: sticky;
+  margin: 0;
+  top: 0;
+  box-sizing: border-box;
+  z-index: 10;
+} */
+
+.navbar-brand {
+  font-size: 1.9rem;
+  font-weight: bold;
+  color: #ff512f;
+  letter-spacing: 1px;
+}
+
+.navbar-links {
+  list-style: none;
+  display: flex;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-links li {
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.3rem 1rem;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.navbar-links li:hover,
+.navbar-links li.active {
+  background: #ff512f;
+  color: #fff;
+}
+/* ...existing styles... */
+
+.hero-section {
+  position: relative;
+  min-height: 340px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: flex-end;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  margin-bottom: 2rem;
+}
+
+.hero-section:hover {
+  box-shadow: 0 8px 32px rgba(221, 36, 118, 0.18);
+}
+
+.hero-overlay {
+  width: 100%;
+  background: linear-gradient(
+    0deg,
+    rgba(35, 37, 38, 0.95) 60%,
+    rgba(35, 37, 38, 0.2) 100%
+  );
+  padding: 2.5rem 2rem 1.5rem 2rem;
+  border-bottom-left-radius: 18px;
+  border-bottom-right-radius: 18px;
+}
+
+.hero-content {
+  max-width: 700px;
+  color: #fff;
+}
+
+.hero-title {
+  font-size: 2.2rem;
+  margin: 0 0 0.7rem 0;
+  color: #ff512f;
+  letter-spacing: 1px;
+}
+
+.hero-overview {
+  font-size: 1.1rem;
+  margin-bottom: 1.2rem;
+  color: #eee;
+}
+
+.hero-play-btn {
+  background: #ff512f;
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  padding: 0.7rem 2.2rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: background 0.2s;
+}
+
+.hero-play-btn:hover {
+  background: #dd2476;
+}
+
+.secondary-navbar {
+  background: #232526;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0.5rem 2rem;
+  border-bottom: 1px solid #333;
+}
+
+.star-filter-list {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.star-filter-list li {
+  cursor: pointer;
+  color: #fff;
+  font-weight: 500;
+  padding: 0.3rem 1rem;
+  border-radius: 20px;
+  transition: background 0.2s;
+}
+
+.star-filter-list li.active,
+.star-filter-list li:hover {
+  background: #ffb400;
+  color: #232526;
+}
+
+.navbar-spacer {
+  flex: 1;
+}
+/* ...existing code... */
+.modern-footer {
+  background: #18191a;
+  color: #eaeaea;
+  padding: 2.5rem 0 1.2rem 0;
+  margin-top: 3rem;
+  font-family: inherit;
+  border-top: 1px solid #232526;
+}
+
+.footer-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1100px;
+  margin: 0 auto 1.2rem auto;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  gap: 0.5rem;
+}
+
+.footer-popcorn {
+  font-size: 2rem;
+}
+
+.footer-title {
+  color: #ffb400;
+}
+
+.footer-nav {
+  display: flex;
+  gap: 2rem;
+}
+
+.footer-nav a {
+  color: #eaeaea;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.footer-nav a:hover {
+  color: #ffb400;
+}
+
+.footer-socials {
+  display: flex;
+  gap: 1.2rem;
+}
+
+.footer-socials a {
+  display: flex;
+  align-items: center;
+  color: #eaeaea;
+  background: #232526;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+  text-decoration: none;
+}
+
+.footer-socials a:hover {
+  background: #ffb400;
+  color: #232526;
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1100px;
+  margin: 0 auto;
+  font-size: 0.95rem;
+  color: #b0b0b0;
+  border-top: 1px solid #232526;
+  padding-top: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.footer-links a {
+  color: #b0b0b0;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-links a:hover {
+  color: #ffb400;
+}
+
+.search {
+  justify-self: center;
+  border: none;
+  padding: 1.1rem 1.2rem;
+  font-size: 1.4rem;
+  border-radius: 0.7rem;
+  width: 20rem;
+  transition: all 0.3s;
+  color: var(--color-text);
+
+  /* background-color: var(--color-background-900); */
+  background-color: var(--color-primary-light);
+}
+
+/* // function Footer() {
+//   return (
+//     <div>
+//       <footer className="modern-footer">
+//         <div className="footer-main">
+//           <div className="footer-logo">
+//             <span role="img" aria-label="popcorn" className="footer-popcorn">
+//               🍿
+//             </span>
+//             <span className="footer-title">BingleBeam</span>
+//           </div>
+//           <nav className="footer-nav">
+//             <a href="/trending">Popular</a>
+//             <a href="/genres">Genres</a>
+//             <a href="/watchlist">Upcoming</a>
+//           </nav>
+//           <div className="footer-socials">
+//             <a href="#" title="Twitter" aria-label="Twitter">
+//               <svg width="22" height="22" fill="currentColor">
+//                 <circle cx="11" cy="11" r="10" />
+//                 <text
+//                   x="11"
+//                   y="16"
+//                   textAnchor="middle"
+//                   fontSize="12"
+//                   fill="#232526"
+//                 >
+//                   X
+//                 </text>
+//               </svg>
+//             </a>
+//             <a href="#" title="TikTok" aria-label="TikTok">
+//               <svg width="22" height="22" fill="currentColor">
+//                 <circle cx="50" cy="40" r="10" />
+//                 <text
+//                   x="11"
+//                   y="16"
+//                   textAnchor="middle"
+//                   fontSize="12"
+//                   fill="#232526"
+//                 >
+//                   TikTok
+//                 </text>
+//               </svg>
+//             </a>
+//           </div>
+//         </div>
+//         <div className="footer-bottom">
+//           <span>© 2025 BingleBeam</span>
+//           <span className="footer-links">
+//             <a href="/privacy">Privacy</a>
+//             <span>·</span>
+//             <a href="/terms">Terms</a>
+//           </span>
+//         </div>
+//       </footer>
+//     </div>
+//   );
+// } */
+
+ {
+  /* <Footer /> */
+}
