@@ -20,7 +20,7 @@
      - Main grid displaying filtered movies as cards, with details shown on hover.
 */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./index.css";
 
 // TMDB API key and URLs
@@ -42,9 +42,10 @@ const STAR_FILTERS = [
 ];
 
 export default function App() {
+  const [query, setQuery] = useState("");
   // State for active movie section (Popular, Top Rated, Upcoming)
   const [activeSection, setActiveSection] = useState(NAV_OPTIONS[0].endpoint);
-  const [query, setQuery] = useState("");
+
   // State for star filter selection
   const [starFilter, setStarFilter] = useState(null);
   // State for fetched movies
@@ -58,43 +59,24 @@ export default function App() {
   useEffect(
     function () {
       const controller = new AbortController();
-
       async function fetchMovies() {
         try {
-          setLoading(true);
-
           const res = await fetch(
-            `https://api.themoviedb.org/3/movie/?api_key=${API_KEY}&s=${query}`,
+            `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(
+              query
+            )}`,
             { signal: controller.signal }
           );
 
           if (!res.ok)
             throw new Error("Something went wrong with fetching movies");
-
           const data = await res.json();
-          if (data.Response === "False") throw new Error("Movie not found");
-
-          setMovies(data.Search);
+          setMovies(data.results);
         } catch (err) {
-          if (err.name !== "AbortError") {
-            err.message;
-          }
-          setMovies([]);
-        } finally {
-          setLoading(false);
+          if (err.name !== "AbortError") setMovies("Error fetching rates");
         }
       }
-
-      if (query.length < 3) {
-        setMovies([]);
-        return;
-      }
-
       fetchMovies();
-
-      return function () {
-        controller.abort();
-      };
     },
     [query]
   );
@@ -150,12 +132,13 @@ export default function App() {
 
   return (
     <div>
-      <MainNavBar
+      <ResponsiveNavBar
         activeSection={activeSection}
         setActiveSection={setActiveSection}
         query={query}
         setQuery={setQuery}
       />
+
       <StarRatingNavBar starFilter={starFilter} setStarFilter={setStarFilter} />
 
       <HeroSection heroMovie={heroMovie} />
@@ -167,18 +150,198 @@ export default function App() {
   );
 }
 
-function MainNavBar({ activeSection, setActiveSection }) {
-  {
-    /* Main navigation bar */
-  }
+// --- ResponsiveNavBar Component ---
+function ResponsiveNavBar({
+  activeSection,
+  setActiveSection,
+  query,
+  setQuery,
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const menuRef = useRef(null);
+  const hamburgerRef = useRef(null);
+
+  // Track window width for responsive logic
+  useEffect(() => {
+    function handleResize() {
+      setWindowWidth(window.innerWidth);
+      if (window.innerWidth > 1024 && menuOpen) {
+        setMenuOpen(false);
+      }
+    }
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [menuOpen]);
+
+  // --- Add this useEffect to auto-close menu on desktop ---
+  useEffect(() => {
+    function handleResize() {
+      if (window.innerWidth > 1024 && menuOpen) {
+        setMenuOpen(false);
+      }
+    }
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [menuOpen]);
+
+  // Close menu on ESC or click outside
+  useEffect(() => {
+    function handleKey(e) {
+      if (e.key === "Escape") setMenuOpen(false);
+    }
+    function handleClick(e) {
+      if (
+        menuOpen &&
+        menuRef.current &&
+        !menuRef.current.contains(e.target) &&
+        !hamburgerRef.current.contains(e.target)
+      ) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("keydown", handleKey);
+    document.addEventListener("mousedown", handleClick);
+    return () => {
+      document.removeEventListener("keydown", handleKey);
+      document.removeEventListener("mousedown", handleClick);
+    };
+  }, [menuOpen]);
+
+  // Trap focus in menu when open
+  useEffect(() => {
+    if (!menuOpen) return;
+    const focusable = menuRef.current.querySelectorAll(
+      "button, [tabindex]:not([tabindex='-1'])"
+    );
+    if (focusable.length) focusable[0].focus();
+    function trap(e) {
+      if (e.key !== "Tab") return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+    menuRef.current.addEventListener("keydown", trap);
+    return () =>
+      menuRef.current && menuRef.current.removeEventListener("keydown", trap);
+  }, [menuOpen]);
+
+  // Navigation links for dropdown and desktop
+  const navLinks = (
+    <>
+      {NAV_OPTIONS.map((option) => (
+        <button
+          key={option.endpoint}
+          className={`navbar-link-btn${
+            activeSection === option.endpoint ? " active" : ""
+          }`}
+          onClick={() => {
+            setActiveSection(option.endpoint);
+            setMenuOpen(false);
+          }}
+          tabIndex={0}
+        >
+          {option.label}
+        </button>
+      ))}
+      {/* Example extra links */}
+      <button className="navbar-link-btn" tabIndex={0}>
+        About
+      </button>
+      <button className="navbar-link-btn" tabIndex={0}>
+        Contact
+      </button>
+    </>
+  );
+
   return (
-    <nav className="navbar">
+    <nav className="navbar responsive-navbar">
       <NavBrand />
-      <SeachBar />
-      <NavLinks
-        activeSection={activeSection}
-        setActiveSection={setActiveSection}
-      />
+      <div className="navbar-spacer" />
+      <div className="navbar-desktop">
+        <SeachBar query={query} setQuery={setQuery} />
+        <div className="navbar-links">
+          {NAV_OPTIONS.map((option) => (
+            <button
+              key={option.endpoint}
+              className={`navbar-link-btn${
+                activeSection === option.endpoint ? " active" : ""
+              }`}
+              onClick={() => setActiveSection(option.endpoint)}
+              tabIndex={0}
+            >
+              {option.label}
+            </button>
+          ))}
+          {/* Add About/Contact if you want */}
+        </div>
+      </div>
+      {/* Hamburger for ≤1024px */}
+      <button
+        className={`hamburger${menuOpen ? " open" : ""}`}
+        aria-label={menuOpen ? "Close menu" : "Open menu"}
+        aria-expanded={menuOpen}
+        aria-controls="navbar-dropdown"
+        onClick={() => setMenuOpen((o) => !o)}
+        ref={hamburgerRef}
+      >
+        <span />
+        <span />
+        <span />
+      </button>
+      {/* Overlay and Dropdown - only render when menuOpen */}
+      {menuOpen && (
+        <>
+          <div
+            className="navbar-overlay show"
+            tabIndex={-1}
+            aria-hidden={!menuOpen}
+          />
+          <aside
+            className="navbar-dropdown show"
+            id="navbar-dropdown"
+            ref={menuRef}
+            role="menu"
+            aria-modal="true"
+          >
+            <div className="navbar-dropdown-content">
+              {/* Only show X button for tablet (width > 600px) */}
+              {windowWidth > 600 && (
+                <button
+                  className="navbar-link-btn"
+                  style={{
+                    alignSelf: "flex-end",
+                    marginBottom: "1rem",
+                    background: "#232526",
+                    color: "#fff",
+                    fontWeight: "bold",
+                    fontSize: "1.2rem",
+                  }}
+                  onClick={() => setMenuOpen(false)}
+                  aria-label="Close menu"
+                >
+                  ✕
+                </button>
+              )}
+
+              {/* Search bar with Search & Close button */}
+              <SeachBar
+                query={query}
+                setQuery={setQuery}
+                onSearchClose={() => setMenuOpen(false)}
+                showSearchClose
+              />
+              <div className="navbar-dropdown-links">{navLinks}</div>
+            </div>
+          </aside>
+        </>
+      )}
     </nav>
   );
 }
@@ -302,7 +465,7 @@ function MainBar({ loading, filteredMovies }) {
     /* Loading indicator or movies grid */
   }
   return loading ? (
-    <div classNme="loading">
+    <div className="loading">
       <span role="img" aria-label="popcorn">
         🍿
       </span>{" "}
