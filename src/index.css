@@ -86,6 +86,19 @@ body {
   color: var(--primary);
   letter-spacing: 1px;
   user-select: none;
+  background: linear-gradient(90deg, #ff512f, #ffb400, #dd2476, #ff512f);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: brand-gradient 3s linear infinite;
+}
+@keyframes brand-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
 }
 
 .navbar-spacer {
@@ -300,6 +313,9 @@ body {
   box-shadow: var(--shadow);
   margin-bottom: 2rem;
   border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 0 0 8px rgba(255, 81, 47, 0.12), 0 4px 24px rgba(0, 0, 0, 0.18);
+  position: relative;
   overflow: hidden;
 }
 

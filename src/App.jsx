@@ -19,139 +19,120 @@
      - Header with section title and subtitle.
      - Main grid displaying filtered movies as cards, with details shown on hover.
 */
-
 import React, { useEffect, useState, useRef } from "react";
 import "./index.css";
 
-// TMDB API key and URLs
+// --- Constants ---
 const API_KEY = "22d19f086c563f125db7af6fad49fa8e";
 const TMDB_MOVIE_URL = "https://www.themoviedb.org/movie/";
-
-// Navigation options for main sections
 const NAV_OPTIONS = [
   { label: "Popular 🔥", endpoint: "popular" },
   { label: "Top Rated ⭐", endpoint: "top_rated" },
   { label: "Upcoming 😃", endpoint: "upcoming" },
 ];
-
-// Star rating filter options
 const STAR_FILTERS = [
   { label: "6-star movies", value: 6 },
   { label: "7-star movies", value: 7 },
   { label: "8-star movies", value: 8 },
 ];
 
+// --- Main App ---
 export default function App() {
   const [query, setQuery] = useState("");
-  // State for active movie section (Popular, Top Rated, Upcoming)
   const [activeSection, setActiveSection] = useState(NAV_OPTIONS[0].endpoint);
-
-  // State for star filter selection
   const [starFilter, setStarFilter] = useState(null);
-  // State for fetched movies
   const [movies, setMovies] = useState([]);
-
-  // State for loading indicator
   const [loading, setLoading] = useState(true);
-  // State for hero section movie
   const [heroMovie, setHeroMovie] = useState(null);
 
-  useEffect(
-    function () {
-      const controller = new AbortController();
-      async function fetchMovies() {
-        try {
-          const res = await fetch(
-            `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(
-              query
-            )}`,
-            { signal: controller.signal }
-          );
-
-          if (!res.ok)
-            throw new Error("Something went wrong with fetching movies");
-          const data = await res.json();
-          setMovies(data.results);
-        } catch (err) {
-          if (err.name !== "AbortError") setMovies("Error fetching rates");
-        }
-      }
-      fetchMovies();
-    },
-    [query]
-  );
-
-  // Fetch a random top-rated movie for the hero section on mount
+  // Search movies
   useEffect(() => {
-    const fetchHeroMovie = async () => {
+    if (!query) return;
+    const controller = new AbortController();
+    async function fetchMovies() {
       try {
-        const response = await fetch(
+        const res = await fetch(
+          `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(
+            query
+          )}`,
+          { signal: controller.signal }
+        );
+        if (!res.ok) throw new Error("Error fetching movies");
+        const data = await res.json();
+        setMovies(data.results);
+      } catch (err) {
+        if (err.name !== "AbortError") setMovies([]);
+      }
+    }
+    fetchMovies();
+    return () => controller.abort();
+  }, [query]);
+
+  // Hero movie (random top-rated)
+  useEffect(() => {
+    async function fetchHeroMovie() {
+      try {
+        const res = await fetch(
           `https://api.themoviedb.org/3/movie/top_rated?api_key=${API_KEY}`
         );
-        const data = await response.json();
-        if (data.results && data.results.length > 0) {
-          // Pick a random movie from the results
+        const data = await res.json();
+        if (data.results?.length) {
           const randomIndex = Math.floor(Math.random() * data.results.length);
           setHeroMovie(data.results[randomIndex]);
         }
-      } catch (error) {
-        console.error(error);
-      }
-    };
+      } catch {}
+    }
     fetchHeroMovie();
   }, []);
 
-  // Fetch movies for the selected section (Popular, Top Rated, Upcoming)
+  // Section movies
   useEffect(() => {
-    const fetchMovies = async () => {
-      setLoading(true);
+    if (query) return; // Don't override search results
+    setLoading(true);
+    async function fetchMovies() {
       try {
-        const response = await fetch(
+        const res = await fetch(
           `https://api.themoviedb.org/3/movie/${activeSection}?api_key=${API_KEY}`
         );
-        const data = await response.json();
-        if (data.results && data.results.length > 0) {
-          setMovies(data.results);
-        } else {
-          setMovies([]);
-        }
-      } catch (error) {
-        console.error(error);
+        const data = await res.json();
+        setMovies(data.results || []);
+      } catch {
         setMovies([]);
       }
       setLoading(false);
-    };
-
+    }
     fetchMovies();
-  }, [activeSection]);
+  }, [activeSection, query]);
 
-  // Filter movies by selected star rating, if any
+  // Filter by star
   const filteredMovies = starFilter
-    ? movies.filter((movie) => Math.floor(movie.vote_average) === starFilter)
+    ? movies.filter((m) => Math.floor(m.vote_average) === starFilter)
     : movies;
 
   return (
     <div>
-      <ResponsiveNavBar
+      <NavBar
+        navOptions={NAV_OPTIONS}
         activeSection={activeSection}
         setActiveSection={setActiveSection}
         query={query}
         setQuery={setQuery}
       />
-
-      <StarRatingNavBar starFilter={starFilter} setStarFilter={setStarFilter} />
-
+      <StarFilterNav
+        starFilter={starFilter}
+        setStarFilter={setStarFilter}
+        filters={STAR_FILTERS}
+      />
       <HeroSection heroMovie={heroMovie} />
-
-      <SectionHeader activeSection={activeSection} />
-
-      <MainBar loading={loading} filteredMovies={filteredMovies} />
+      <SectionHeader navOptions={NAV_OPTIONS} activeSection={activeSection} />
+      <MoviesGrid loading={loading} movies={filteredMovies} />
     </div>
   );
 }
 
-// --- ResponsiveNavBar Component ---
-function ResponsiveNavBar({
+// --- NavBar ---
+function NavBar({
+  navOptions,
   activeSection,
   setActiveSection,
   query,
@@ -162,30 +143,17 @@ function ResponsiveNavBar({
   const menuRef = useRef(null);
   const hamburgerRef = useRef(null);
 
-  // Track window width for responsive logic
+  // Responsive logic
   useEffect(() => {
     function handleResize() {
       setWindowWidth(window.innerWidth);
-      if (window.innerWidth > 1024 && menuOpen) {
-        setMenuOpen(false);
-      }
+      if (window.innerWidth > 1024 && menuOpen) setMenuOpen(false);
     }
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [menuOpen]);
 
-  // --- Add this useEffect to auto-close menu on desktop ---
-  useEffect(() => {
-    function handleResize() {
-      if (window.innerWidth > 1024 && menuOpen) {
-        setMenuOpen(false);
-      }
-    }
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [menuOpen]);
-
-  // Close menu on ESC or click outside
+  // Close menu on ESC/click outside
   useEffect(() => {
     function handleKey(e) {
       if (e.key === "Escape") setMenuOpen(false);
@@ -208,7 +176,7 @@ function ResponsiveNavBar({
     };
   }, [menuOpen]);
 
-  // Trap focus in menu when open
+  // Trap focus in menu
   useEffect(() => {
     if (!menuOpen) return;
     const focusable = menuRef.current.querySelectorAll(
@@ -232,57 +200,30 @@ function ResponsiveNavBar({
       menuRef.current && menuRef.current.removeEventListener("keydown", trap);
   }, [menuOpen]);
 
-  // Navigation links for dropdown and desktop
-  const navLinks = (
-    <>
-      {NAV_OPTIONS.map((option) => (
-        <button
-          key={option.endpoint}
-          className={`navbar-link-btn${
-            activeSection === option.endpoint ? " active" : ""
-          }`}
-          onClick={() => {
-            setActiveSection(option.endpoint);
-            setMenuOpen(false);
-          }}
-          tabIndex={0}
-        >
-          {option.label}
-        </button>
-      ))}
-      {/* Example extra links */}
-      <button className="navbar-link-btn" tabIndex={0}>
-        About
-      </button>
-      <button className="navbar-link-btn" tabIndex={0}>
-        Contact
-      </button>
-    </>
-  );
+  const navLinks = navOptions.map((option) => (
+    <button
+      key={option.endpoint}
+      className={`navbar-link-btn${
+        activeSection === option.endpoint ? " active" : ""
+      }`}
+      onClick={() => {
+        setActiveSection(option.endpoint);
+        setMenuOpen(false);
+      }}
+      tabIndex={0}
+    >
+      {option.label}
+    </button>
+  ));
 
   return (
     <nav className="navbar responsive-navbar">
-      <NavBrand />
+      <div className="navbar-brand">🎬 BingleBeam</div>
       <div className="navbar-spacer" />
       <div className="navbar-desktop">
-        <SeachBar query={query} setQuery={setQuery} />
-        <div className="navbar-links">
-          {NAV_OPTIONS.map((option) => (
-            <button
-              key={option.endpoint}
-              className={`navbar-link-btn${
-                activeSection === option.endpoint ? " active" : ""
-              }`}
-              onClick={() => setActiveSection(option.endpoint)}
-              tabIndex={0}
-            >
-              {option.label}
-            </button>
-          ))}
-          {/* Add About/Contact if you want */}
-        </div>
+        <SearchBar query={query} setQuery={setQuery} />
+        <div className="navbar-links">{navLinks}</div>
       </div>
-      {/* Hamburger for ≤1024px */}
       <button
         className={`hamburger${menuOpen ? " open" : ""}`}
         aria-label={menuOpen ? "Close menu" : "Open menu"}
@@ -295,7 +236,6 @@ function ResponsiveNavBar({
         <span />
         <span />
       </button>
-      {/* Overlay and Dropdown - only render when menuOpen */}
       {menuOpen && (
         <>
           <div
@@ -311,7 +251,6 @@ function ResponsiveNavBar({
             aria-modal="true"
           >
             <div className="navbar-dropdown-content">
-              {/* Only show X button for tablet (width > 600px) */}
               {windowWidth > 600 && (
                 <button
                   className="navbar-link-btn"
@@ -329,14 +268,7 @@ function ResponsiveNavBar({
                   ✕
                 </button>
               )}
-
-              {/* Search bar with Search & Close button */}
-              <SeachBar
-                query={query}
-                setQuery={setQuery}
-                onSearchClose={() => setMenuOpen(false)}
-                showSearchClose
-              />
+              <SearchBar query={query} setQuery={setQuery} />
               <div className="navbar-dropdown-links">{navLinks}</div>
             </div>
           </aside>
@@ -346,11 +278,8 @@ function ResponsiveNavBar({
   );
 }
 
-function NavBrand() {
-  return <div className="navbar-brand">🎬 BingleBeam</div>;
-}
-
-function SeachBar({ query, setQuery }) {
+// --- SearchBar ---
+function SearchBar({ query, setQuery }) {
   return (
     <input
       className="search"
@@ -362,33 +291,13 @@ function SeachBar({ query, setQuery }) {
   );
 }
 
-function NavLinks({ activeSection, setActiveSection }) {
-  return (
-    <div>
-      <ul className="navbar-links">
-        {NAV_OPTIONS.map((option) => (
-          <li
-            key={option.endpoint}
-            className={activeSection === option.endpoint ? "active" : ""}
-            onClick={() => setActiveSection(option.endpoint)}
-          >
-            {option.label}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function StarRatingNavBar({ starFilter, setStarFilter }) {
-  {
-    /* Star rating filter navbar */
-  }
+// --- StarFilterNav ---
+function StarFilterNav({ starFilter, setStarFilter, filters }) {
   return (
     <nav className="navbar secondary-navbar">
       <div className="navbar-spacer"></div>
       <ul className="star-filter-list">
-        {STAR_FILTERS.map((filter) => (
+        {filters.map((filter) => (
           <li
             key={filter.value}
             className={starFilter === filter.value ? "active" : ""}
@@ -404,102 +313,93 @@ function StarRatingNavBar({ starFilter, setStarFilter }) {
   );
 }
 
+// --- HeroSection ---
 function HeroSection({ heroMovie }) {
+  if (!heroMovie) return null;
   return (
-    <div>
-      {/* Hero section with random top-rated movie */}
-      {heroMovie && (
-        <section
-          className="hero-section"
-          style={{
-            backgroundImage: heroMovie.backdrop_path
-              ? `url(https://image.tmdb.org/t/p/original${heroMovie.backdrop_path})`
-              : "#232526",
-          }}
-          onClick={() =>
-            window.open(`${TMDB_MOVIE_URL}${heroMovie.id}`, "_blank")
-          }
-          title="Click to view movie details"
-        >
-          <div className="hero-overlay">
-            <div className="hero-content">
-              <h2 className="hero-title">{heroMovie.title}</h2>
-              <p className="hero-overview">
-                {/* Truncate overview if too long */}
-                {heroMovie.overview.length > 180
-                  ? heroMovie.overview.slice(0, 180) + "..."
-                  : heroMovie.overview}
-              </p>
-              <button className="hero-play-btn">▶ Play</button>
-            </div>
-          </div>
-        </section>
-      )}
-    </div>
-  );
-}
-
-function SectionHeader({ activeSection }) {
-  return (
-    <div>
-      {/* Section header */}
-      <header className="app-header">
-        <h1 className="app-title">
-          {NAV_OPTIONS.find((opt) => opt.endpoint === activeSection).label}{" "}
-          Movies
-        </h1>
-        <p className="app-subtitle">
-          Discover the{" "}
-          {NAV_OPTIONS.find(
-            (opt) => opt.endpoint === activeSection
-          ).label.toLowerCase()}{" "}
-          movies right now!
-        </p>
-      </header>
-    </div>
-  );
-}
-
-function MainBar({ loading, filteredMovies }) {
-  {
-    /* Loading indicator or movies grid */
-  }
-  return loading ? (
-    <div className="loading">
-      <span role="img" aria-label="popcorn">
-        🍿
-      </span>{" "}
-      Loading movies...
-    </div>
-  ) : (
-    <main className="movies-grid">
-      {/* Render filtered movie cards */}
-      {filteredMovies.map((movie) => (
-        <div className="movie-card" key={movie.id}>
-          {movie.poster_path ? (
-            <img
-              className="movie-poster"
-              src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-              alt={movie.title}
-            />
-          ) : (
-            <div className="no-image">No Image</div>
-          )}
-          <div className="movie-details">
-            <h3 className="movie-title">{movie.title}</h3>
-            <p className="movie-overview">
-              {/* Truncate overview if too long */}
-              {movie.overview.length > 120
-                ? movie.overview.slice(0, 120) + "..."
-                : movie.overview}
-            </p>
-            <div className="movie-info">
-              <span className="movie-rating">⭐ {movie.vote_average}</span>
-              <span className="movie-date">{movie.release_date}</span>
-            </div>
-          </div>
+    <section
+      className="hero-section"
+      style={{
+        backgroundImage: heroMovie.backdrop_path
+          ? `url(https://image.tmdb.org/t/p/original${heroMovie.backdrop_path})`
+          : "#232526",
+      }}
+      onClick={() => window.open(`${TMDB_MOVIE_URL}${heroMovie.id}`, "_blank")}
+      title="Click to view movie details"
+    >
+      <div className="hero-overlay">
+        <div className="hero-content">
+          <h2 className="hero-title">{heroMovie.title}</h2>
+          <p className="hero-overview">
+            {heroMovie.overview.length > 180
+              ? heroMovie.overview.slice(0, 180) + "..."
+              : heroMovie.overview}
+          </p>
+          <button className="hero-play-btn">▶ Play</button>
         </div>
+      </div>
+    </section>
+  );
+}
+
+// --- SectionHeader ---
+function SectionHeader({ navOptions, activeSection }) {
+  const section = navOptions.find((opt) => opt.endpoint === activeSection);
+  return (
+    <header className="app-header">
+      <h1 className="app-title">{section.label} Movies</h1>
+      <p className="app-subtitle">
+        Discover the {section.label.toLowerCase()} movies right now!
+      </p>
+    </header>
+  );
+}
+
+// --- MoviesGrid ---
+function MoviesGrid({ loading, movies }) {
+  if (loading)
+    return (
+      <div className="loading">
+        <span role="img" aria-label="popcorn">
+          🍿
+        </span>{" "}
+        Loading movies...
+      </div>
+    );
+  return (
+    <main className="movies-grid">
+      {movies.map((movie) => (
+        <MovieCard key={movie.id} movie={movie} />
       ))}
     </main>
+  );
+}
+
+// --- MovieCard ---
+function MovieCard({ movie }) {
+  return (
+    <div className="movie-card">
+      {movie.poster_path ? (
+        <img
+          className="movie-poster"
+          src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+          alt={movie.title}
+        />
+      ) : (
+        <div className="no-image">No Image</div>
+      )}
+      <div className="movie-details">
+        <h3 className="movie-title">{movie.title}</h3>
+        <p className="movie-overview">
+          {movie.overview.length > 120
+            ? movie.overview.slice(0, 120) + "..."
+            : movie.overview}
+        </p>
+        <div className="movie-info">
+          <span className="movie-rating">⭐ {movie.vote_average}</span>
+          <span className="movie-date">{movie.release_date}</span>
+        </div>
+      </div>
+    </div>
   );
 }
