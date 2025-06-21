@@ -16,6 +16,7 @@ const NAV = [
   { label: "Now Playing 🎥", endpoint: "now_playing" },
 ];
 
+// eslint-disable-next-line
 export const STAR_FILTERS = [
   { label: "6-star movies", value: 6 },
   { label: "7-star movies", value: 7 },
