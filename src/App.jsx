@@ -5,6 +5,7 @@ import { Hero } from "./Hero";
 import { Header } from "./Header";
 import { MovieGrid } from "./MovieGrid";
 import { NavBar } from "./NavBar";
+import Footer from "./Footer";
 
 const API_KEY = "22d19f086c563f125db7af6fad49fa8e";
 export const TMDB_MOVIE_URL = "https://www.themoviedb.org/movie/";
@@ -140,22 +141,25 @@ export default function App() {
           setSection(NAV[0].endpoint);
         }}
       />
-      <StarNav star={star} setStar={setStar} />
-      <div className="desktop-only">
-        <Genre
-          selectedGenre={selectedGenre}
-          setSelectedGenre={(genreId) => {
-            setSelectedGenre(genreId);
-            setQuery("");
-            setSection(NAV[0].endpoint);
-          }}
-          genres={genres}
-        />
-      </div>
+      <div className="max-width-container">
+        <StarNav star={star} setStar={setStar} />
+        <div className="desktop-only">
+          <Genre
+            selectedGenre={selectedGenre}
+            setSelectedGenre={(genreId) => {
+              setSelectedGenre(genreId);
+              setQuery("");
+              setSection(NAV[0].endpoint);
+            }}
+            genres={genres}
+          />
+        </div>
 
-      <Hero movie={hero} />
-      <Header nav={NAV} section={section} />
-      <MovieGrid loading={loading} movies={shownMovies} />
+        <Hero movie={hero} />
+        <Header nav={NAV} section={section} />
+        <MovieGrid loading={loading} movies={shownMovies} />
+      </div>
+      <Footer />
     </div>
   );
 }

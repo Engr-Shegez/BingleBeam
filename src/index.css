@@ -1,3 +1,28 @@
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-logo-text {
+  font-size: 2rem;
+  font-weight: bold;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  /* background: linear-gradient(90deg, #41d1ff, #bd34fe); */
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 2px;
+  font-family: "Arial", sans-serif;
+}
+/* Limit main content width and center it on large screens */
+.max-width-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  padding-left: 16px;
+  padding-right: 16px;
+}
 /* ============================================================
    BingleBeam Movie App - Modern Responsive CSS
    ============================================================
@@ -20,11 +45,11 @@
   --primary: #ff512f;
   --secondary: #dd2476;
   --bg-dark: #232526;
-  --bg-light: #414345;
+  --bg-light: #04315e;
   --footer-bg: #18191a;
   --footer-border: #232526;
   --footer-accent: #ffb400;
-  --text: #fff;
+  --text: #e9f4ec;
   --text-muted: #b0b0b0;
   --card-bg: #444;
   --radius-lg: 18px;
@@ -50,8 +75,8 @@ body {
 body.light-mode {
   --primary: #ffb400;
   --secondary: #ff512f;
-  --bg-dark: #f7f7f7;
-  --bg-light: #fff;
+  --bg-dark: #f6fad7;
+  --bg-light: #f6f4db;
   --footer-bg: #eaeaea;
   --footer-border: #ccc;
   --footer-accent: #ff512f;
@@ -172,8 +197,8 @@ body.light-mode {
   height: 3px;
   width: 28px;
   margin: 6px auto;
-  background: #878686;
-  border-radius: 2px;
+  background: #070705;
+  /* border-radius: 2px; */
   transition: all 0.3s cubic-bezier(0.4, 2, 0.6, 1);
 }
 .hamburger.open span:nth-child(1) {
@@ -892,7 +917,7 @@ body.light-mode .star-filter-list li:hover {
   background: rgb(210, 32, 8);
 }
 body.light-mode .navbar-dropdown {
-  background: #fff !important;
+  background: #e1e8b6 !important;
   color: #232526 !important;
   box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08);
 }
@@ -1012,4 +1037,82 @@ body.light-mode .navbar-dropdown-genres-label {
   border-radius: 151px;
   border: 1px solid #ccc;
   font-size: 1rem;
+}
+
+.footer {
+  background: #494646;
+  color: #fff;
+  padding: 10px 0 10px 0;
+  margin-top: 30px;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.footer-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: auto;
+  padding: 0 20px;
+}
+
+.footer-logo h2 {
+  margin: 0;
+  font-size: 2rem;
+  letter-spacing: 2px;
+}
+
+.footer-links {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.5rem;
+  transition: color 0.2s;
+}
+
+.footer-links a:hover {
+  color: #00bcd4;
+}
+
+.footer-social {
+  display: flex;
+  gap: 16px;
+}
+
+.footer-social img {
+  width: 28px;
+  height: 28px;
+  transition: transform 0.2s;
+}
+
+.footer-social img:hover {
+  transform: scale(1.1);
+}
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 0.95rem;
+  color: #bbb;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .footer-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+  }
+  .footer-logo {
+    margin-bottom: 12px;
+  }
+  .footer-links {
+    margin-bottom: 12px;
+  }
 }
