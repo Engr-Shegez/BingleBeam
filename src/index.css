@@ -192,7 +192,7 @@ body.light-mode {
   position: relative;
   z-index: 120;
   transition: filter var(--transition);
-  /* margin-left: 320px; */
+  margin-left: 20px;
 }
 .hamburger span {
   display: block;
@@ -731,7 +731,7 @@ body.light-mode {
   .secondary-navbar {
     padding: 0.3rem 3rem;
     margin: 0 auto;
-    top: 120px;
+    top: 20px;
   }
   .star-filter-list {
     gap: 0.7rem;
