@@ -192,7 +192,7 @@ body.light-mode {
   position: relative;
   z-index: 120;
   transition: filter var(--transition);
-  margin-left: 320px;
+  /* margin-left: 320px; */
 }
 .hamburger span {
   display: block;

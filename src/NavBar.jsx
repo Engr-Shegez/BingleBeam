@@ -43,6 +43,17 @@ export function NavBar({
         >
           {dark ? "🌙" : "☀️"}
         </button>
+        <button
+          className={`hamburger${open ? " open" : ""}`}
+          aria-label={open ? "Close menu" : "Open menu"}
+          aria-expanded={open}
+          onClick={() => setOpen((o) => !o)}
+          ref={burgerRef}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
       </div>
       <div className="navbar-spacer" />
       <div className="navbar-desktop">
@@ -61,17 +72,7 @@ export function NavBar({
           ))}
         </div>
       </div>
-      <button
-        className={`hamburger${open ? " open" : ""}`}
-        aria-label={open ? "Close menu" : "Open menu"}
-        aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
-        ref={burgerRef}
-      >
-        <span />
-        <span />
-        <span />
-      </button>
+
       {open && (
         <>
           <div className="navbar-overlay show" tabIndex={-1} />
